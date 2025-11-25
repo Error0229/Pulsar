@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+
 using MxHapticCursorPlugin.Native;
 
 namespace MxHapticCursorPlugin.Monitoring;
@@ -12,6 +13,7 @@ public class PollingCursorMonitor : ICursorMonitor
 {
     private readonly int _pollIntervalMs;
     private readonly Timer _timer;
+    private readonly object _lock = new object();
     private CursorType _lastCursorType;
     private IntPtr _lastCursorHandle;
     private bool _isRunning;
@@ -31,57 +33,70 @@ public class PollingCursorMonitor : ICursorMonitor
 
     public void Start()
     {
-        if (_isRunning) return;
+        lock (_lock)
+        {
+            if (_isRunning) return;
 
-        _isRunning = true;
-        _timer.Change(0, _pollIntervalMs);
+            _isRunning = true;
+            _timer.Change(0, _pollIntervalMs);
+        }
     }
 
     public void Stop()
     {
-        if (!_isRunning) return;
+        lock (_lock)
+        {
+            if (!_isRunning) return;
 
-        _isRunning = false;
-        _timer.Change(Timeout.Infinite, Timeout.Infinite);
+            _isRunning = false;
+            _timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
     }
 
     private void OnTimerTick(object state)
     {
-        if (!_isRunning) return;
-
-        try
+        lock (_lock)
         {
-            var cursorInfo = User32.GetCurrentCursor();
+            if (!_isRunning) return;
 
-            // Only process if cursor handle changed
-            if (cursorInfo.hCursor == _lastCursorHandle)
-                return;
-
-            var newCursorType = User32.GetCursorType(cursorInfo.hCursor);
-
-            // Only raise event if cursor TYPE changed (not just handle)
-            if (newCursorType != _lastCursorType)
+            try
             {
-                var oldType = _lastCursorType;
-                _lastCursorType = newCursorType;
-                _lastCursorHandle = cursorInfo.hCursor;
+                var cursorInfo = User32.GetCurrentCursor();
 
-                CursorChanged?.Invoke(oldType, newCursorType);
+                // Only process if cursor handle changed
+                if (cursorInfo.hCursor == _lastCursorHandle)
+                    return;
+
+                var newCursorType = User32.GetCursorType(cursorInfo.hCursor);
+
+                // Only raise event if cursor TYPE changed (not just handle)
+                if (newCursorType != _lastCursorType)
+                {
+                    var oldType = _lastCursorType;
+                    _lastCursorType = newCursorType;
+                    _lastCursorHandle = cursorInfo.hCursor;
+
+                    CursorChanged?.Invoke(oldType, newCursorType);
+                }
+                else
+                {
+                    _lastCursorHandle = cursorInfo.hCursor;
+                }
             }
-            else
+            catch
             {
-                _lastCursorHandle = cursorInfo.hCursor;
+                // Swallow exceptions in timer callback to prevent crashes
             }
-        }
-        catch
-        {
-            // Swallow exceptions in timer callback to prevent crashes
         }
     }
 
     public void Dispose()
     {
-        Stop();
-        _timer?.Dispose();
+        lock (_lock)
+        {
+            Stop();
+            CursorChanged = null; // Clear subscribers
+            _timer?.Dispose();
+        }
     }
 }
