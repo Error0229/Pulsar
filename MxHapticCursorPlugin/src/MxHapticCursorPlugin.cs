@@ -15,6 +15,11 @@ namespace Loupedeck.MxHapticCursorPlugin
         // Gets a value indicating whether this is a Universal plugin or an Application plugin.
         public override Boolean HasNoApplication => true;
 
+        // Settings storage keys
+        private const string SettingPreset = "sensitivity_preset";
+        private const string SettingMonitoringMode = "monitoring_mode";
+        private const string SettingEnabled = "enabled";
+
         private ICursorMonitor _cursorMonitor;
         private HapticController _hapticController;
         private HapticSettings _settings;
@@ -41,8 +46,8 @@ namespace Loupedeck.MxHapticCursorPlugin
             this.PluginEvents.AddEvent("knock", "Knock", "Notifications");
             this.PluginEvents.AddEvent("mad", "Mad", "Blocked actions");
 
-            // Load settings (default to Medium preset for now)
-            _settings = HapticSettings.CreatePreset(SensitivityPreset.Medium);
+            // Load settings from storage
+            LoadSettingsFromStorage();
 
             // Create haptic controller
             _hapticController = new HapticController(_settings, TriggerHapticEvent);
@@ -86,6 +91,77 @@ namespace Loupedeck.MxHapticCursorPlugin
         {
             // Record device activity when any command is triggered
             _hapticController?.RecordDeviceActivity();
+        }
+
+        private void LoadSettingsFromStorage()
+        {
+            // Load from plugin settings storage
+            var presetValue = 1; // Default Medium
+            if (this.TryGetPluginSetting(SettingPreset, out var presetStr) && int.TryParse(presetStr, out var p))
+            {
+                presetValue = p;
+            }
+
+            var modeValue = 0; // Default Polling
+            if (this.TryGetPluginSetting(SettingMonitoringMode, out var modeStr) && int.TryParse(modeStr, out var m))
+            {
+                modeValue = m;
+            }
+
+            var enabled = true; // Default enabled
+            if (this.TryGetPluginSetting(SettingEnabled, out var enabledStr) && bool.TryParse(enabledStr, out var e))
+            {
+                enabled = e;
+            }
+
+            var preset = (SensitivityPreset)presetValue;
+            _settings = HapticSettings.CreatePreset(preset);
+            _settings.MonitoringMode = (MonitoringMode)modeValue;
+            _settings.Enabled = enabled;
+        }
+
+        private void SaveSettingsToStorage()
+        {
+            this.SetPluginSetting(SettingPreset, ((int)_settings.Preset).ToString(), false);
+            this.SetPluginSetting(SettingMonitoringMode, ((int)_settings.MonitoringMode).ToString(), false);
+            this.SetPluginSetting(SettingEnabled, _settings.Enabled.ToString(), false);
+        }
+
+        public void UpdatePreset(SensitivityPreset preset)
+        {
+            _settings = HapticSettings.CreatePreset(preset);
+            SaveSettingsToStorage();
+
+            // Restart monitor with new settings
+            RestartMonitor();
+        }
+
+        public void UpdateMonitoringMode(MonitoringMode mode)
+        {
+            _settings.MonitoringMode = mode;
+            SaveSettingsToStorage();
+
+            // Restart monitor with new mode
+            RestartMonitor();
+        }
+
+        public void SetEnabled(bool enabled)
+        {
+            _settings.Enabled = enabled;
+            SaveSettingsToStorage();
+        }
+
+        private void RestartMonitor()
+        {
+            _cursorMonitor?.Stop();
+            _cursorMonitor?.Dispose();
+
+            _cursorMonitor = _settings.MonitoringMode == MonitoringMode.Polling
+                ? new PollingCursorMonitor(pollIntervalMs: 50)
+                : new EventDrivenCursorMonitor();
+
+            _cursorMonitor.CursorChanged += _hapticController.OnCursorChanged;
+            _cursorMonitor.Start();
         }
     }
 }
