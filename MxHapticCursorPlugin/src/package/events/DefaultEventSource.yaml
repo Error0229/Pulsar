@@ -1,0 +1,28 @@
+events:
+  - name: sharp_collision
+    displayName: Sharp Collision
+    description: Sharp haptic feedback for collisions (resize handles)
+
+  - name: subtle_collision
+    displayName: Subtle Collision
+    description: Gentle haptic feedback for soft transitions
+
+  - name: sharp_state_change
+    displayName: Sharp State Change
+    description: Clear haptic for important state changes (clickable elements)
+
+  - name: damp_state_change
+    displayName: Damp State Change
+    description: Soft haptic for returning to default state
+
+  - name: ringing
+    displayName: Ringing
+    description: Continuous feedback for ongoing processes
+
+  - name: knock
+    displayName: Knock
+    description: Notification-style haptic
+
+  - name: mad
+    displayName: Mad
+    description: Strong negative feedback (blocked actions)
