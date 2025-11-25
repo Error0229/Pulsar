@@ -19,7 +19,7 @@ Haptic cursor feedback for Logitech MX Master 4. Feel subtle vibrations when you
 
 ## Installation
 
-1. Download latest release from [Releases](https://github.com/yourusername/mx-haptic-cursor/releases)
+1. Download latest release from [Releases](https://github.com/cato/pulsar/releases)
 2. Extract to `%LOCALAPPDATA%\Logi\LogiPluginService\Plugins\`
 3. Restart Logitech Options+
 4. Plugin appears in Options+ → Plugins
