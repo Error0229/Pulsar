@@ -75,7 +75,10 @@ public static class User32
     public static CURSORINFO GetCurrentCursor()
     {
         var cursorInfo = new CURSORINFO { cbSize = Marshal.SizeOf(typeof(CURSORINFO)) };
-        GetCursorInfo(ref cursorInfo);
+        if (!GetCursorInfo(ref cursorInfo))
+        {
+            throw new System.ComponentModel.Win32Exception();
+        }
         return cursorInfo;
     }
 
