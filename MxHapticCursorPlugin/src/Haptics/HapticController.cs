@@ -13,13 +13,15 @@ public class HapticController
 {
     private readonly HapticSettings _settings;
     private readonly Action<string> _triggerHapticEvent;
+    private readonly Action<string> _logDebug;
     private readonly ThrottleFilter _throttleFilter;
     private readonly DeviceActivityTracker _activityTracker;
 
-    public HapticController(HapticSettings settings, Action<string> triggerHapticEvent)
+    public HapticController(HapticSettings settings, Action<string> triggerHapticEvent, Action<string> logDebug = null)
     {
         _settings = settings;
         _triggerHapticEvent = triggerHapticEvent;
+        _logDebug = logDebug ?? (_ => { });
         _throttleFilter = new ThrottleFilter(settings.ThrottleMs);
         _activityTracker = new DeviceActivityTracker(settings.ActivityDetectionWindowMs);
     }
@@ -29,25 +31,36 @@ public class HapticController
     /// </summary>
     public void OnCursorChanged(CursorType from, CursorType to)
     {
-        if (!_settings.Enabled)
-            return;
+        _logDebug($"Cursor changed: {from} -> {to}");
 
-        // Check if device is active (prevents haptics when using trackpad/other mouse)
-        if (!_activityTracker.IsActive())
+        if (!_settings.Enabled)
+        {
+            _logDebug("Haptics disabled, skipping");
             return;
+        }
+
+        // Cursor movement implies mouse activity
+        _activityTracker.RecordActivity();
 
         // Check cursor type filter
         if (!_settings.CursorFilter.ShouldAllow(from, to))
+        {
+            _logDebug($"Filter blocked transition: {from} -> {to}");
             return;
+        }
 
         // Check throttle
         if (!_throttleFilter.ShouldAllow(from, to))
+        {
+            _logDebug("Throttle blocked");
             return;
+        }
 
         // Get waveform and trigger haptic
         var waveform = _settings.WaveformMapper.GetWaveform(from, to);
         var eventName = WaveformMapper.ToEventName(waveform);
 
+        _logDebug($"Triggering haptic event: {eventName}");
         _triggerHapticEvent(eventName);
     }
 

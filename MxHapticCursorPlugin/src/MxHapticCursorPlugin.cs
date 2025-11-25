@@ -49,8 +49,8 @@ namespace Loupedeck.MxHapticCursorPlugin
             // Load settings from storage
             LoadSettingsFromStorage();
 
-            // Create haptic controller
-            _hapticController = new HapticController(_settings, TriggerHapticEvent);
+            // Create haptic controller with debug logging
+            _hapticController = new HapticController(_settings, TriggerHapticEvent, msg => this.Log.Info(msg));
 
             // Create cursor monitor based on settings
             _cursorMonitor = _settings.MonitoringMode == MonitoringMode.Polling
@@ -127,13 +127,24 @@ namespace Loupedeck.MxHapticCursorPlugin
             this.SetPluginSetting(SettingEnabled, _settings.Enabled.ToString(), false);
         }
 
+        public SensitivityPreset CurrentPreset => _settings?.Preset ?? SensitivityPreset.Medium;
+        public MonitoringMode CurrentMonitoringMode => _settings?.MonitoringMode ?? MonitoringMode.Polling;
+        public bool IsEnabled => _settings?.Enabled ?? true;
+
         public void UpdatePreset(SensitivityPreset preset)
         {
+            var wasEnabled = _settings?.Enabled ?? true;
+            var currentMode = _settings?.MonitoringMode ?? MonitoringMode.Polling;
+
             _settings = HapticSettings.CreatePreset(preset);
+            _settings.Enabled = wasEnabled;
+            _settings.MonitoringMode = currentMode;
             SaveSettingsToStorage();
 
-            // Restart monitor with new settings
-            RestartMonitor();
+            // Recreate controller and monitor with new settings
+            RecreateControllerAndMonitor();
+
+            this.Log.Info($"Preset changed to: {preset}");
         }
 
         public void UpdateMonitoringMode(MonitoringMode mode)
@@ -141,23 +152,30 @@ namespace Loupedeck.MxHapticCursorPlugin
             _settings.MonitoringMode = mode;
             SaveSettingsToStorage();
 
-            // Restart monitor with new mode
-            RestartMonitor();
-        }
+            // Recreate controller and monitor with new mode
+            RecreateControllerAndMonitor();
 
-        public bool IsEnabled => _settings?.Enabled ?? true;
+            this.Log.Info($"Monitoring mode changed to: {mode}");
+        }
 
         public void SetEnabled(bool enabled)
         {
             _settings.Enabled = enabled;
             SaveSettingsToStorage();
+
+            this.Log.Info($"Haptics enabled: {enabled}");
         }
 
-        private void RestartMonitor()
+        private void RecreateControllerAndMonitor()
         {
+            // Stop old monitor
             _cursorMonitor?.Stop();
             _cursorMonitor?.Dispose();
 
+            // Recreate haptic controller with new settings
+            _hapticController = new HapticController(_settings, TriggerHapticEvent, msg => this.Log.Info(msg));
+
+            // Create new monitor
             _cursorMonitor = _settings.MonitoringMode == MonitoringMode.Polling
                 ? new PollingCursorMonitor(pollIntervalMs: 50)
                 : new EventDrivenCursorMonitor();

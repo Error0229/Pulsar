@@ -17,7 +17,8 @@ public class DeviceActivityTracker
     {
         _activityWindowMs = activityWindowMs;
         _stopwatch = Stopwatch.StartNew();
-        _lastActivityTimestamp = null; // No activity initially
+        // Start active - assume mouse is being used until inactivity proves otherwise
+        _lastActivityTimestamp = 0;
     }
 
     /// <summary>

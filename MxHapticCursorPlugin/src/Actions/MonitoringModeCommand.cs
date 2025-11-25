@@ -3,35 +3,44 @@ namespace Loupedeck.MxHapticCursorPlugin.Actions
     using System;
     using global::MxHapticCursorPlugin.Settings;
 
-    public class MonitoringModeCommand : PluginMultistateDynamicCommand
+    public class MonitoringModeCommand : PluginDynamicCommand
     {
-        private readonly MxHapticCursorPlugin _plugin;
+        private MxHapticCursorPlugin HapticPlugin => this.Plugin as MxHapticCursorPlugin;
 
         public MonitoringModeCommand()
+            : base(displayName: "Monitor Mode",
+                   description: "Toggle between Polling and Event-Driven monitoring",
+                   groupName: "Haptic Settings")
         {
-            this.DisplayName = "Monitoring Mode";
-            this.Description = "Switch between polling and event-driven monitoring";
-            this.GroupName = "Settings";
-
-            _plugin = (MxHapticCursorPlugin)base.Plugin;
-
-            this.AddState("Polling", "Polling Mode (Simple, Constant CPU)");
-            this.AddState("EventDriven", "Event-Driven Mode (Efficient, Complex)");
         }
 
         protected override void RunCommand(string actionParameter)
         {
-            if (_plugin == null)
-            {
-                return;
-            }
+            if (this.HapticPlugin == null) return;
 
-            var mode = actionParameter == "Polling"
-                ? MonitoringMode.Polling
-                : MonitoringMode.EventDriven;
+            var currentMode = this.HapticPlugin.CurrentMonitoringMode;
+            var nextMode = currentMode == MonitoringMode.Polling
+                ? MonitoringMode.EventDriven
+                : MonitoringMode.Polling;
 
-            _plugin.UpdateMonitoringMode(mode);
+            PluginLog.Info($"Monitor: {currentMode} -> {nextMode}");
+            this.HapticPlugin.UpdateMonitoringMode(nextMode);
             this.ActionImageChanged();
+        }
+
+        protected override string GetCommandDisplayName(string actionParameter, PluginImageSize imageSize)
+        {
+            var mode = this.HapticPlugin?.CurrentMonitoringMode ?? MonitoringMode.Polling;
+            return mode == MonitoringMode.Polling ? "Poll" : "Event";
+        }
+
+        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize)
+        {
+            var mode = this.HapticPlugin?.CurrentMonitoringMode ?? MonitoringMode.Polling;
+            using var builder = new BitmapBuilder(imageSize);
+            builder.Clear(BitmapColor.Black);
+            builder.DrawText(mode == MonitoringMode.Polling ? "Poll" : "Event");
+            return builder.ToImage();
         }
     }
 }

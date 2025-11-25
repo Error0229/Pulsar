@@ -4,32 +4,30 @@ namespace Loupedeck.MxHapticCursorPlugin.Actions
 
     public class EnableToggleCommand : PluginDynamicCommand
     {
-        private readonly MxHapticCursorPlugin _plugin;
+        private MxHapticCursorPlugin HapticPlugin => this.Plugin as MxHapticCursorPlugin;
 
         public EnableToggleCommand()
+            : base(displayName: "Enable/Disable Haptics",
+                   description: "Toggle cursor haptic feedback on/off",
+                   groupName: "Settings")
         {
-            this.DisplayName = "Enable/Disable Haptics";
-            this.Description = "Toggle cursor haptic feedback on/off";
-            this.GroupName = "Settings";
-
-            _plugin = (MxHapticCursorPlugin)base.Plugin;
         }
 
         protected override void RunCommand(string actionParameter)
         {
-            if (_plugin == null)
+            if (this.HapticPlugin == null)
             {
                 return;
             }
 
-            bool currentState = _plugin.IsEnabled;
-            _plugin.SetEnabled(!currentState);
+            bool currentState = this.HapticPlugin.IsEnabled;
+            this.HapticPlugin.SetEnabled(!currentState);
             this.ActionImageChanged();
         }
 
         protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize)
         {
-            bool isEnabled = _plugin?.IsEnabled ?? true;
+            bool isEnabled = this.HapticPlugin?.IsEnabled ?? true;
             var color = isEnabled ? BitmapColor.Green : BitmapColor.Red;
             using var builder = new BitmapBuilder(imageSize);
             builder.Clear(color);
