@@ -5,7 +5,6 @@ namespace Loupedeck.MxHapticCursorPlugin.Actions
     public class EnableToggleCommand : PluginDynamicCommand
     {
         private readonly MxHapticCursorPlugin _plugin;
-        private bool _isEnabled = true;
 
         public EnableToggleCommand()
         {
@@ -23,17 +22,18 @@ namespace Loupedeck.MxHapticCursorPlugin.Actions
                 return;
             }
 
-            _isEnabled = !_isEnabled;
-            _plugin.SetEnabled(_isEnabled);
+            bool currentState = _plugin.IsEnabled;
+            _plugin.SetEnabled(!currentState);
             this.ActionImageChanged();
         }
 
         protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize)
         {
-            var color = _isEnabled ? BitmapColor.Green : BitmapColor.Red;
+            bool isEnabled = _plugin?.IsEnabled ?? true;
+            var color = isEnabled ? BitmapColor.Green : BitmapColor.Red;
             using var builder = new BitmapBuilder(imageSize);
             builder.Clear(color);
-            builder.DrawText(_isEnabled ? "ON" : "OFF");
+            builder.DrawText(isEnabled ? "ON" : "OFF");
             return builder.ToImage();
         }
     }

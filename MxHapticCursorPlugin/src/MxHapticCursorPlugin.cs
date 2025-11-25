@@ -145,6 +145,8 @@ namespace Loupedeck.MxHapticCursorPlugin
             RestartMonitor();
         }
 
+        public bool IsEnabled => _settings?.Enabled ?? true;
+
         public void SetEnabled(bool enabled)
         {
             _settings.Enabled = enabled;
