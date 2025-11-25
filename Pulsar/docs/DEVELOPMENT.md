@@ -15,8 +15,8 @@
 ### Clone and Build
 
 ```bash
-git clone https://github.com/yourusername/mx-haptic-cursor.git
-cd mx-haptic-cursor/MxHapticCursorPlugin/src
+git clone https://github.com/yourusername/pulsar.git
+cd pulsar/Pulsar/src
 dotnet build
 ```
 
@@ -24,7 +24,7 @@ dotnet build
 
 **Hot Reload Mode:**
 ```bash
-cd MxHapticCursorPlugin/src
+cd Pulsar/src
 dotnet watch build
 ```
 
@@ -35,7 +35,7 @@ Changes are automatically reloaded in Logi Options+ (may require action reassign
 ### Unit Tests
 
 ```bash
-cd MxHapticCursorPlugin.Tests
+cd Pulsar.Tests
 dotnet test
 ```
 
@@ -83,7 +83,7 @@ Low sensitivity (500ms throttle):
 
 **Enable Debug Logging:**
 
-Modify `src/MxHapticCursorPlugin.cs`:
+Modify `src/Pulsar.cs`:
 
 ```csharp
 private void TriggerHapticEvent(string eventName)
@@ -107,7 +107,7 @@ Visual Studio:
 ## Project Structure
 
 ```
-MxHapticCursorPlugin/
+Pulsar/
 ├── src/
 │   ├── Actions/              # Loupedeck UI actions
 │   │   ├── EnableToggleCommand.cs
@@ -144,10 +144,10 @@ MxHapticCursorPlugin/
 │   │       ├── DefaultEventSource.yaml
 │   │       └── extra/
 │   │           └── eventMapping.yaml
-│   ├── MxHapticCursorApplication.cs
-│   ├── MxHapticCursorPlugin.cs
-│   └── MxHapticCursorPlugin.csproj
-├── MxHapticCursorPlugin.Tests/
+│   ├── PulsarApplication.cs
+│   ├── Pulsar.cs
+│   └── Pulsar.csproj
+├── Pulsar.Tests/
 │   ├── Device/
 │   ├── Filtering/
 │   ├── Haptics/
@@ -221,7 +221,7 @@ MxHapticCursorPlugin/
 
 3. **Register event in plugin**:
    ```csharp
-   // src/MxHapticCursorPlugin.cs
+   // src/Pulsar.cs
    this.PluginEvents.AddEvent("new_waveform", "New Waveform", "Description");
    ```
 
@@ -260,12 +260,12 @@ cd src
 dotnet build -c Release
 ```
 
-Output: `bin/Release/net8.0/MxHapticCursorPlugin.dll`
+Output: `bin/Release/net8.0/Pulsar.dll`
 
 Package for distribution:
 1. Copy `bin/Release/net8.0/` contents
 2. Include `src/package/` directory
-3. Zip as `MxHapticCursor-v{version}.zip`
+3. Zip as `Pulsar-v{version}.zip`
 
 ## Common Issues
 

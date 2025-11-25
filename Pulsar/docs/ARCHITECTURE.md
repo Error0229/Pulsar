@@ -75,7 +75,7 @@ Windows Cursor → Monitor → Throttle → Type Filter → Waveform Mapper → 
 
 ### 7. Plugin Integration
 
-**MxHapticCursorPlugin**: Main plugin class
+**Pulsar**: Main plugin class
 - Registers haptic events with SDK
 - Instantiates components
 - Handles settings persistence
