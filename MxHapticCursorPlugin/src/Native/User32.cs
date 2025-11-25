@@ -30,6 +30,34 @@ public static class User32
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
     private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
 
+    // Event hook support
+    public delegate void WinEventDelegate(
+        IntPtr hWinEventHook,
+        uint eventType,
+        IntPtr hwnd,
+        int idObject,
+        int idChild,
+        uint dwEventThread,
+        uint dwmsEventTime);
+
+    [DllImport("user32.dll")]
+    public static extern IntPtr SetWinEventHook(
+        uint eventMin,
+        uint eventMax,
+        IntPtr hmodWinEventProc,
+        WinEventDelegate lpfnWinEventProc,
+        uint idProcess,
+        uint idThread,
+        uint dwFlags);
+
+    [DllImport("user32.dll")]
+    public static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+
+    // Event constants
+    public const uint EVENT_OBJECT_NAMECHANGE = 0x800C;
+    public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
+    public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+
     // Standard cursor IDs from winuser.h
     private const int IDC_ARROW = 32512;
     private const int IDC_IBEAM = 32513;
