@@ -12,7 +12,7 @@ name: MxHapticCursor
 displayName: MX Haptic Cursor Feedback
 
 # Short description of the plugin.
-description: Provides haptic feedback for cursor acceleration on MX Master 4
+description: Triggers haptic feedback when Windows cursor type changes
 
 # Name of the plugin library file.
 pluginFileName: MxHapticCursorPlugin.dll
