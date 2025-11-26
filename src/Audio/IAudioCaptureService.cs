@@ -8,7 +8,7 @@ public interface IAudioCaptureService : IDisposable
     /// <summary>
     /// Fired when audio samples are ready for processing.
     /// </summary>
-    event Action<float[]> SamplesReady;
+    event Action<float[]>? SamplesReady;
 
     /// <summary>
     /// Start capturing audio.

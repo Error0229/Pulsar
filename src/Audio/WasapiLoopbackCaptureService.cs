@@ -13,7 +13,7 @@ public class WasapiLoopbackCaptureService : IAudioCaptureService
     private int _bufferIndex;
     private readonly object _lock = new();
 
-    public event Action<float[]> SamplesReady;
+    public event Action<float[]>? SamplesReady;
     public bool IsCapturing { get; private set; }
     public int SampleRate { get; private set; }
 
@@ -40,10 +40,12 @@ public class WasapiLoopbackCaptureService : IAudioCaptureService
     {
         if (!IsCapturing) return;
 
-        if (_capture != null)
+        var capture = _capture;
+        if (capture != null)
         {
-            _capture.StopRecording();
-            _capture.Dispose();
+            capture.DataAvailable -= OnDataAvailable;
+            capture.StopRecording();
+            capture.Dispose();
             _capture = null;
         }
 
@@ -52,10 +54,11 @@ public class WasapiLoopbackCaptureService : IAudioCaptureService
 
     private void OnDataAvailable(object sender, WaveInEventArgs e)
     {
-        if (_capture == null) return;
+        var capture = _capture;
+        if (capture == null) return;
 
-        var bytesPerSample = _capture.WaveFormat.BitsPerSample / 8;
-        var channels = _capture.WaveFormat.Channels;
+        var bytesPerSample = capture.WaveFormat.BitsPerSample / 8;
+        var channels = capture.WaveFormat.Channels;
         var samplesRecorded = e.BytesRecorded / bytesPerSample;
 
         for (var i = 0; i < samplesRecorded; i += channels)
@@ -65,12 +68,14 @@ public class WasapiLoopbackCaptureService : IAudioCaptureService
             for (var ch = 0; ch < channels; ch++)
             {
                 var byteIndex = (i + ch) * bytesPerSample;
-                if (byteIndex + 3 < e.BytesRecorded)
+                if (byteIndex + bytesPerSample <= e.BytesRecorded)
                 {
                     sample += BitConverter.ToSingle(e.Buffer, byteIndex);
                 }
             }
             sample /= channels;
+
+            float[]? bufferToFire = null;
 
             lock (_lock)
             {
@@ -78,15 +83,15 @@ public class WasapiLoopbackCaptureService : IAudioCaptureService
 
                 if (_bufferIndex >= _bufferSize)
                 {
-                    var bufferCopy = new float[_bufferSize];
-                    Array.Copy(_buffer, bufferCopy, _bufferSize);
+                    bufferToFire = new float[_bufferSize];
+                    Array.Copy(_buffer, bufferToFire, _bufferSize);
                     _bufferIndex = 0;
-
-                    if (SamplesReady != null)
-                    {
-                        SamplesReady.Invoke(bufferCopy);
-                    }
                 }
+            }
+
+            if (bufferToFire != null)
+            {
+                SamplesReady?.Invoke(bufferToFire);
             }
         }
     }
