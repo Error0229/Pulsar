@@ -17,6 +17,7 @@ public class HapticSettings
 
     public CursorTypeFilter CursorFilter { get; set; } = new();
     public WaveformMapper WaveformMapper { get; set; } = WaveformMapper.CreateDefault();
+    public HummingSettings Humming { get; set; } = new();
 
     /// <summary>
     /// Create settings from a preset
