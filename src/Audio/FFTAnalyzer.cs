@@ -11,6 +11,9 @@ public class FFTAnalyzer
 
     public FFTAnalyzer(int fftSize = 1024)
     {
+        if (fftSize <= 0 || (fftSize & (fftSize - 1)) != 0)
+            throw new ArgumentException($"FFT size must be power of 2, got {fftSize}");
+
         _fftSize = fftSize;
     }
 
@@ -70,18 +73,29 @@ public class FFTAnalyzer
 
         if (minBin >= maxBin) return 0;
 
+        var count = maxBin - minBin + 1;
         var sum = 0f;
         for (var i = minBin; i <= maxBin; i++)
         {
             sum += spectrum[i] * spectrum[i];
         }
 
-        return (float)Math.Sqrt(sum / (maxBin - minBin + 1));
+        return (float)Math.Sqrt(sum / count);
     }
 
     private static float[] ApplyHanningWindow(float[] samples)
     {
+        if (samples.Length == 0)
+            throw new ArgumentException("Cannot apply window to empty buffer");
+
         var windowed = new float[samples.Length];
+
+        if (samples.Length == 1)
+        {
+            windowed[0] = samples[0];
+            return windowed;
+        }
+
         for (var i = 0; i < samples.Length; i++)
         {
             var window = 0.5f * (1 - MathF.Cos(2 * MathF.PI * i / (samples.Length - 1)));
