@@ -1,6 +1,7 @@
 namespace Loupedeck.Pulsar.Actions
 {
     using System;
+
     using global::Pulsar.Settings;
 
     public class MonitoringModeCommand : PluginDynamicCommand
@@ -14,9 +15,12 @@ namespace Loupedeck.Pulsar.Actions
         {
         }
 
-        protected override void RunCommand(string actionParameter)
+        protected override void RunCommand(String actionParameter)
         {
-            if (this.HapticPlugin == null) return;
+            if (this.HapticPlugin == null)
+            {
+                return;
+            }
 
             var currentMode = this.HapticPlugin.CurrentMonitoringMode;
             var nextMode = currentMode == MonitoringMode.Polling
@@ -28,13 +32,13 @@ namespace Loupedeck.Pulsar.Actions
             this.ActionImageChanged();
         }
 
-        protected override string GetCommandDisplayName(string actionParameter, PluginImageSize imageSize)
+        protected override String GetCommandDisplayName(String actionParameter, PluginImageSize imageSize)
         {
             var mode = this.HapticPlugin?.CurrentMonitoringMode ?? MonitoringMode.Polling;
             return mode == MonitoringMode.Polling ? "Poll" : "Event";
         }
 
-        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize)
+        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
         {
             var mode = this.HapticPlugin?.CurrentMonitoringMode ?? MonitoringMode.Polling;
             using var builder = new BitmapBuilder(imageSize);

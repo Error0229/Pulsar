@@ -1,6 +1,6 @@
-using Pulsar.Haptics;
-
 namespace Pulsar.Audio.Analysis;
+
+using Pulsar.Haptics;
 
 /// <summary>
 /// Triggers on low-frequency energy (20-150Hz bass).
@@ -8,26 +8,25 @@ namespace Pulsar.Audio.Analysis;
 public class BassAnalysisStrategy : IAnalysisStrategy
 {
     private readonly FFTAnalyzer _fft;
-    private float _previousEnergy;
-    private const float MinFreq = 20f;
-    private const float MaxFreq = 150f;
+    private Single _previousEnergy;
+    private const Single MinFreq = 20f;
+    private const Single MaxFreq = 150f;
 
-    public BassAnalysisStrategy(FFTAnalyzer fft)
-    {
-        _fft = fft;
-    }
+    public BassAnalysisStrategy(FFTAnalyzer fft) => this._fft = fft;
 
-    public HapticTriggerResult? Analyze(float[] spectrum, int sampleRate, float threshold, float sensitivity)
+    public HapticTriggerResult? Analyze(Single[] spectrum, Int32 sampleRate, Single threshold, Single sensitivity)
     {
-        var energy = _fft.GetBandEnergy(spectrum, sampleRate, MinFreq, MaxFreq);
+        var energy = this._fft.GetBandEnergy(spectrum, sampleRate, MinFreq, MaxFreq);
         energy *= sensitivity;
 
         // Detect bass hit (energy spike above threshold)
-        var isHit = energy > threshold && energy > _previousEnergy * 1.5f;
-        _previousEnergy = energy;
+        var isHit = energy > threshold && energy > this._previousEnergy * 1.5f;
+        this._previousEnergy = energy;
 
         if (!isHit)
+        {
             return null;
+        }
 
         // Stronger bass = SharpCollision, lighter = SubtleCollision
         var waveform = energy > threshold * 2

@@ -8,7 +8,7 @@ public interface IAudioCaptureService : IDisposable
     /// <summary>
     /// Fired when audio samples are ready for processing.
     /// </summary>
-    event Action<float[]>? SamplesReady;
+    event Action<Single[]>? SamplesReady;
 
     /// <summary>
     /// Start capturing audio.
@@ -23,10 +23,10 @@ public interface IAudioCaptureService : IDisposable
     /// <summary>
     /// Whether capture is currently active.
     /// </summary>
-    bool IsCapturing { get; }
+    Boolean IsCapturing { get; }
 
     /// <summary>
     /// Sample rate of captured audio.
     /// </summary>
-    int SampleRate { get; }
+    Int32 SampleRate { get; }
 }

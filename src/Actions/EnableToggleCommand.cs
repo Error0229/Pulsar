@@ -13,21 +13,21 @@ namespace Loupedeck.Pulsar.Actions
         {
         }
 
-        protected override void RunCommand(string actionParameter)
+        protected override void RunCommand(String actionParameter)
         {
             if (this.HapticPlugin == null)
             {
                 return;
             }
 
-            bool currentState = this.HapticPlugin.IsEnabled;
+            var currentState = this.HapticPlugin.IsEnabled;
             this.HapticPlugin.SetEnabled(!currentState);
             this.ActionImageChanged();
         }
 
-        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize)
+        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
         {
-            bool isEnabled = this.HapticPlugin?.IsEnabled ?? true;
+            var isEnabled = this.HapticPlugin?.IsEnabled ?? true;
             var color = isEnabled ? BitmapColor.Green : BitmapColor.Red;
             using var builder = new BitmapBuilder(imageSize);
             builder.Clear(color);

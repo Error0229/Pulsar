@@ -1,35 +1,36 @@
+namespace Pulsar.Filtering;
+
 using System;
 using System.Diagnostics;
-using Pulsar.Native;
 
-namespace Pulsar.Filtering;
+using Pulsar.Native;
 
 /// <summary>
 /// Throttles haptic events to prevent overwhelming the user
 /// </summary>
 public class ThrottleFilter
 {
-    private readonly int _throttleMs;
+    private readonly Int32 _throttleMs;
     private readonly Stopwatch _stopwatch;
-    private long _lastAllowedTimestamp;
+    private Int64 _lastAllowedTimestamp;
 
-    public ThrottleFilter(int throttleMs)
+    public ThrottleFilter(Int32 throttleMs)
     {
-        _throttleMs = throttleMs;
-        _stopwatch = Stopwatch.StartNew();
-        _lastAllowedTimestamp = -throttleMs; // Ensure first event always allowed
+        this._throttleMs = throttleMs;
+        this._stopwatch = Stopwatch.StartNew();
+        this._lastAllowedTimestamp = -throttleMs; // Ensure first event always allowed
     }
 
     /// <summary>
     /// Check if event should be allowed based on throttle window
     /// </summary>
-    public bool ShouldAllow(CursorType from, CursorType to)
+    public Boolean ShouldAllow(CursorType from, CursorType to)
     {
-        var currentMs = _stopwatch.ElapsedMilliseconds;
+        var currentMs = this._stopwatch.ElapsedMilliseconds;
 
-        if (currentMs - _lastAllowedTimestamp >= _throttleMs)
+        if (currentMs - this._lastAllowedTimestamp >= this._throttleMs)
         {
-            _lastAllowedTimestamp = currentMs;
+            this._lastAllowedTimestamp = currentMs;
             return true;
         }
 
@@ -39,8 +40,5 @@ public class ThrottleFilter
     /// <summary>
     /// Reset throttle timer
     /// </summary>
-    public void Reset()
-    {
-        _lastAllowedTimestamp = 0;
-    }
+    public void Reset() => this._lastAllowedTimestamp = 0;
 }

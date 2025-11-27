@@ -1,10 +1,11 @@
-using System;
-using Pulsar.Settings;
-using Pulsar.Native;
-using Pulsar.Filtering;
-using Pulsar.Device;
-
 namespace Pulsar.Haptics;
+
+using System;
+
+using Pulsar.Device;
+using Pulsar.Filtering;
+using Pulsar.Native;
+using Pulsar.Settings;
 
 /// <summary>
 /// Coordinates cursor monitoring, filtering, and haptic triggering
@@ -12,18 +13,18 @@ namespace Pulsar.Haptics;
 public class HapticController
 {
     private readonly HapticSettings _settings;
-    private readonly Action<string> _triggerHapticEvent;
-    private readonly Action<string> _logDebug;
+    private readonly Action<String> _triggerHapticEvent;
+    private readonly Action<String> _logDebug;
     private readonly ThrottleFilter _throttleFilter;
     private readonly DeviceActivityTracker _activityTracker;
 
-    public HapticController(HapticSettings settings, Action<string> triggerHapticEvent, Action<string> logDebug = null)
+    public HapticController(HapticSettings settings, Action<String> triggerHapticEvent, Action<String> logDebug = null)
     {
-        _settings = settings;
-        _triggerHapticEvent = triggerHapticEvent;
-        _logDebug = logDebug ?? (_ => { });
-        _throttleFilter = new ThrottleFilter(settings.ThrottleMs);
-        _activityTracker = new DeviceActivityTracker(settings.ActivityDetectionWindowMs);
+        this._settings = settings;
+        this._triggerHapticEvent = triggerHapticEvent;
+        this._logDebug = logDebug ?? (_ => { });
+        this._throttleFilter = new ThrottleFilter(settings.ThrottleMs);
+        this._activityTracker = new DeviceActivityTracker(settings.ActivityDetectionWindowMs);
     }
 
     /// <summary>
@@ -31,46 +32,55 @@ public class HapticController
     /// </summary>
     public void OnCursorChanged(CursorType from, CursorType to)
     {
-        _logDebug($"Cursor changed: {from} -> {to}");
-
-        if (!_settings.Enabled)
+        if (this._settings.VerboseCursorLogging)
         {
-            _logDebug("Haptics disabled, skipping");
+            this._logDebug($"Cursor changed: {from} -> {to}");
+        }
+
+        if (!this._settings.Enabled)
+        {
+            if (this._settings.VerboseCursorLogging)
+            {
+                this._logDebug("Haptics disabled, skipping");
+            }
             return;
         }
 
         // Cursor movement implies mouse activity
-        _activityTracker.RecordActivity();
+        this._activityTracker.RecordActivity();
 
         // Check cursor type filter
-        if (!_settings.CursorFilter.ShouldAllow(from, to))
+        if (!this._settings.CursorFilter.ShouldAllow(from, to))
         {
-            _logDebug($"Filter blocked transition: {from} -> {to}");
+            if (this._settings.VerboseCursorLogging)
+            {
+                this._logDebug($"Filter blocked transition: {from} -> {to}");
+            }
             return;
         }
 
         // Check throttle
-        if (!_throttleFilter.ShouldAllow(from, to))
+        if (!this._throttleFilter.ShouldAllow(from, to))
         {
-            _logDebug("Throttle blocked");
+            if (this._settings.VerboseCursorLogging)
+            {
+                this._logDebug("Throttle blocked");
+            }
             return;
         }
 
         // Get waveform and trigger haptic
-        var waveform = _settings.WaveformMapper.GetWaveform(from, to);
+        var waveform = this._settings.WaveformMapper.GetWaveform(from, to);
         var eventName = WaveformMapper.ToEventName(waveform);
 
-        _logDebug($"Triggering haptic event: {eventName}");
-        _triggerHapticEvent(eventName);
+        this._logDebug($"Triggering haptic event: {eventName}");
+        this._triggerHapticEvent(eventName);
     }
 
     /// <summary>
     /// Record MX Master 4 activity (call from plugin when buttons/wheel used)
     /// </summary>
-    public void RecordDeviceActivity()
-    {
-        _activityTracker.RecordActivity();
-    }
+    public void RecordDeviceActivity() => this._activityTracker.RecordActivity();
 
     /// <summary>
     /// Update settings (throttle, filters, etc.)

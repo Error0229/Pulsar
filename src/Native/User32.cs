@@ -1,7 +1,7 @@
+namespace Pulsar.Native;
+
 using System;
 using System.Runtime.InteropServices;
-
-namespace Pulsar.Native;
 
 /// <summary>
 /// Windows user32.dll P/Invoke declarations for cursor monitoring
@@ -11,8 +11,8 @@ public static class User32
     [StructLayout(LayoutKind.Sequential)]
     public struct CURSORINFO
     {
-        public int cbSize;
-        public int flags;
+        public Int32 cbSize;
+        public Int32 flags;
         public IntPtr hCursor;
         public POINT ptScreenPos;
     }
@@ -20,61 +20,61 @@ public static class User32
     [StructLayout(LayoutKind.Sequential)]
     public struct POINT
     {
-        public int X;
-        public int Y;
+        public Int32 X;
+        public Int32 Y;
     }
 
     [DllImport("user32.dll")]
-    private static extern bool GetCursorInfo(ref CURSORINFO pci);
+    private static extern Boolean GetCursorInfo(ref CURSORINFO pci);
 
     [DllImport("user32.dll", CharSet = CharSet.Auto)]
-    private static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
+    private static extern IntPtr LoadCursor(IntPtr hInstance, Int32 lpCursorName);
 
     // Event hook support
     public delegate void WinEventDelegate(
         IntPtr hWinEventHook,
-        uint eventType,
+        UInt32 eventType,
         IntPtr hwnd,
-        int idObject,
-        int idChild,
-        uint dwEventThread,
-        uint dwmsEventTime);
+        Int32 idObject,
+        Int32 idChild,
+        UInt32 dwEventThread,
+        UInt32 dwmsEventTime);
 
     [DllImport("user32.dll")]
     public static extern IntPtr SetWinEventHook(
-        uint eventMin,
-        uint eventMax,
+        UInt32 eventMin,
+        UInt32 eventMax,
         IntPtr hmodWinEventProc,
         WinEventDelegate lpfnWinEventProc,
-        uint idProcess,
-        uint idThread,
-        uint dwFlags);
+        UInt32 idProcess,
+        UInt32 idThread,
+        UInt32 dwFlags);
 
     [DllImport("user32.dll")]
-    public static extern bool UnhookWinEvent(IntPtr hWinEventHook);
+    public static extern Boolean UnhookWinEvent(IntPtr hWinEventHook);
 
     // Event constants
-    public const uint EVENT_OBJECT_NAMECHANGE = 0x800C;
-    public const uint EVENT_SYSTEM_FOREGROUND = 0x0003;
-    public const uint WINEVENT_OUTOFCONTEXT = 0x0000;
+    public const UInt32 EVENT_OBJECT_NAMECHANGE = 0x800C;
+    public const UInt32 EVENT_SYSTEM_FOREGROUND = 0x0003;
+    public const UInt32 WINEVENT_OUTOFCONTEXT = 0x0000;
 
     // Standard cursor IDs from winuser.h
-    private const int IDC_ARROW = 32512;
-    private const int IDC_IBEAM = 32513;
-    private const int IDC_WAIT = 32514;
-    private const int IDC_CROSS = 32515;
-    private const int IDC_UPARROW = 32516;
-    private const int IDC_SIZE = 32640;
-    private const int IDC_ICON = 32641;
-    private const int IDC_SIZENWSE = 32642;
-    private const int IDC_SIZENESW = 32643;
-    private const int IDC_SIZEWE = 32644;
-    private const int IDC_SIZENS = 32645;
-    private const int IDC_SIZEALL = 32646;
-    private const int IDC_NO = 32648;
-    private const int IDC_HAND = 32649;
-    private const int IDC_APPSTARTING = 32650;
-    private const int IDC_HELP = 32651;
+    private const Int32 IDC_ARROW = 32512;
+    private const Int32 IDC_IBEAM = 32513;
+    private const Int32 IDC_WAIT = 32514;
+    private const Int32 IDC_CROSS = 32515;
+    private const Int32 IDC_UPARROW = 32516;
+    private const Int32 IDC_SIZE = 32640;
+    private const Int32 IDC_ICON = 32641;
+    private const Int32 IDC_SIZENWSE = 32642;
+    private const Int32 IDC_SIZENESW = 32643;
+    private const Int32 IDC_SIZEWE = 32644;
+    private const Int32 IDC_SIZENS = 32645;
+    private const Int32 IDC_SIZEALL = 32646;
+    private const Int32 IDC_NO = 32648;
+    private const Int32 IDC_HAND = 32649;
+    private const Int32 IDC_APPSTARTING = 32650;
+    private const Int32 IDC_HELP = 32651;
 
     private static readonly Dictionary<IntPtr, CursorType> _systemCursors;
 
@@ -103,23 +103,11 @@ public static class User32
     public static CURSORINFO GetCurrentCursor()
     {
         var cursorInfo = new CURSORINFO { cbSize = Marshal.SizeOf(typeof(CURSORINFO)) };
-        if (!GetCursorInfo(ref cursorInfo))
-        {
-            throw new System.ComponentModel.Win32Exception();
-        }
-        return cursorInfo;
+        return !GetCursorInfo(ref cursorInfo) ? throw new System.ComponentModel.Win32Exception() : cursorInfo;
     }
 
     /// <summary>
     /// Detect cursor type from cursor handle
     /// </summary>
-    public static CursorType GetCursorType(IntPtr hCursor)
-    {
-        if (_systemCursors.TryGetValue(hCursor, out var cursorType))
-        {
-            return cursorType;
-        }
-
-        return CursorType.Custom;
-    }
+    public static CursorType GetCursorType(IntPtr hCursor) => _systemCursors.TryGetValue(hCursor, out var cursorType) ? cursorType : CursorType.Custom;
 }

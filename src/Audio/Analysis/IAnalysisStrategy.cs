@@ -1,6 +1,6 @@
-using Pulsar.Haptics;
-
 namespace Pulsar.Audio.Analysis;
+
+using Pulsar.Haptics;
 
 /// <summary>
 /// Analyzes FFT spectrum and determines if haptic should trigger.
@@ -15,10 +15,10 @@ public interface IAnalysisStrategy
     /// <param name="threshold">Trigger threshold (0-1)</param>
     /// <param name="sensitivity">Sensitivity multiplier</param>
     /// <returns>Waveform to trigger, or null if no trigger</returns>
-    HapticTriggerResult? Analyze(float[] spectrum, int sampleRate, float threshold, float sensitivity);
+    HapticTriggerResult? Analyze(Single[] spectrum, Int32 sampleRate, Single threshold, Single sensitivity);
 }
 
 /// <summary>
 /// Result of audio analysis.
 /// </summary>
-public record HapticTriggerResult(WaveformType Waveform, float Intensity);
+public record HapticTriggerResult(WaveformType Waveform, Single Intensity);

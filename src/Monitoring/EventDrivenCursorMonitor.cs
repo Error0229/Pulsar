@@ -1,9 +1,9 @@
+namespace Pulsar.Monitoring;
+
 using System;
 using System.Threading;
 
 using Pulsar.Native;
-
-namespace Pulsar.Monitoring;
 
 /// <summary>
 /// Uses Windows event hooks to detect cursor changes.
@@ -16,8 +16,8 @@ public class EventDrivenCursorMonitor : ICursorMonitor
     private CursorType _lastCursorType;
     private IntPtr _lastCursorHandle;
     private readonly Timer _fallbackTimer;
-    private readonly object _lock = new object();
-    private bool _isRunning;
+    private readonly Object _lock = new Object();
+    private Boolean _isRunning;
 
     public event Action<CursorType, CursorType> CursorChanged;
 
@@ -25,79 +25,85 @@ public class EventDrivenCursorMonitor : ICursorMonitor
     {
         // Initialize with current cursor
         var cursorInfo = User32.GetCurrentCursor();
-        _lastCursorHandle = cursorInfo.hCursor;
-        _lastCursorType = User32.GetCursorType(_lastCursorHandle);
+        this._lastCursorHandle = cursorInfo.hCursor;
+        this._lastCursorType = User32.GetCursorType(this._lastCursorHandle);
 
         // Fallback polling at 200ms for cases where event hook misses changes
-        _fallbackTimer = new Timer(OnFallbackTick, null, Timeout.Infinite, Timeout.Infinite);
+        this._fallbackTimer = new Timer(this.OnFallbackTick, null, Timeout.Infinite, Timeout.Infinite);
     }
 
     public void Start()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            if (_isRunning) return;
+            if (this._isRunning)
+            {
+                return;
+            }
 
-            _isRunning = true;
+            this._isRunning = true;
 
             // Create delegate and keep reference to prevent GC
-            _hookDelegate = OnWinEvent;
+            this._hookDelegate = this.OnWinEvent;
 
             // Hook into cursor change events
             // Note: EVENT_OBJECT_NAMECHANGE doesn't always fire for cursor changes
             // So we also monitor foreground window changes as a trigger to check cursor
-            _hookHandle = User32.SetWinEventHook(
+            this._hookHandle = User32.SetWinEventHook(
                 User32.EVENT_SYSTEM_FOREGROUND,
                 User32.EVENT_SYSTEM_FOREGROUND,
                 IntPtr.Zero,
-                _hookDelegate,
+                this._hookDelegate,
                 0,
                 0,
                 User32.WINEVENT_OUTOFCONTEXT);
 
             // Start fallback polling at 200ms intervals
-            _fallbackTimer.Change(200, 200);
+            this._fallbackTimer.Change(200, 200);
         }
     }
 
     public void Stop()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            if (!_isRunning) return;
-
-            _isRunning = false;
-
-            if (_hookHandle != IntPtr.Zero)
+            if (!this._isRunning)
             {
-                User32.UnhookWinEvent(_hookHandle);
-                _hookHandle = IntPtr.Zero;
+                return;
             }
 
-            _fallbackTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            _hookDelegate = null;
+            this._isRunning = false;
+
+            if (this._hookHandle != IntPtr.Zero)
+            {
+                User32.UnhookWinEvent(this._hookHandle);
+                this._hookHandle = IntPtr.Zero;
+            }
+
+            this._fallbackTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            this._hookDelegate = null;
         }
     }
 
     private void OnWinEvent(
         IntPtr hWinEventHook,
-        uint eventType,
+        UInt32 eventType,
         IntPtr hwnd,
-        int idObject,
-        int idChild,
-        uint dwEventThread,
-        uint dwmsEventTime)
-    {
-        CheckCursorChange();
-    }
+        Int32 idObject,
+        Int32 idChild,
+        UInt32 dwEventThread,
+        UInt32 dwmsEventTime) => this.CheckCursorChange();
 
-    private void OnFallbackTick(object state)
+    private void OnFallbackTick(Object state)
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            if (!_isRunning) return;
+            if (!this._isRunning)
+            {
+                return;
+            }
 
-            CheckCursorChange();
+            this.CheckCursorChange();
         }
     }
 
@@ -108,23 +114,25 @@ public class EventDrivenCursorMonitor : ICursorMonitor
             var cursorInfo = User32.GetCurrentCursor();
 
             // Only process if cursor handle changed
-            if (cursorInfo.hCursor == _lastCursorHandle)
+            if (cursorInfo.hCursor == this._lastCursorHandle)
+            {
                 return;
+            }
 
             var newCursorType = User32.GetCursorType(cursorInfo.hCursor);
 
             // Only raise event if cursor TYPE changed
-            if (newCursorType != _lastCursorType)
+            if (newCursorType != this._lastCursorType)
             {
-                var oldType = _lastCursorType;
-                _lastCursorType = newCursorType;
-                _lastCursorHandle = cursorInfo.hCursor;
+                var oldType = this._lastCursorType;
+                this._lastCursorType = newCursorType;
+                this._lastCursorHandle = cursorInfo.hCursor;
 
                 CursorChanged?.Invoke(oldType, newCursorType);
             }
             else
             {
-                _lastCursorHandle = cursorInfo.hCursor;
+                this._lastCursorHandle = cursorInfo.hCursor;
             }
         }
         catch
@@ -135,11 +143,11 @@ public class EventDrivenCursorMonitor : ICursorMonitor
 
     public void Dispose()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            Stop();
+            this.Stop();
             CursorChanged = null; // Clear subscribers
-            _fallbackTimer?.Dispose();
+            this._fallbackTimer?.Dispose();
         }
     }
 }

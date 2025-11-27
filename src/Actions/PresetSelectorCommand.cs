@@ -1,6 +1,7 @@
 namespace Loupedeck.Pulsar.Actions
 {
     using System;
+
     using global::Pulsar.Settings;
 
     public class PresetSelectorCommand : PluginDynamicCommand
@@ -21,13 +22,19 @@ namespace Loupedeck.Pulsar.Actions
         {
         }
 
-        protected override void RunCommand(string actionParameter)
+        protected override void RunCommand(String actionParameter)
         {
-            if (this.HapticPlugin == null) return;
+            if (this.HapticPlugin == null)
+            {
+                return;
+            }
 
             var currentPreset = this.HapticPlugin.CurrentPreset;
             var currentIndex = Array.IndexOf(Presets, currentPreset);
-            if (currentIndex < 0) currentIndex = 1;
+            if (currentIndex < 0)
+            {
+                currentIndex = 1;
+            }
 
             var nextIndex = (currentIndex + 1) % Presets.Length;
             var nextPreset = Presets[nextIndex];
@@ -37,13 +44,13 @@ namespace Loupedeck.Pulsar.Actions
             this.ActionImageChanged();
         }
 
-        protected override string GetCommandDisplayName(string actionParameter, PluginImageSize imageSize)
+        protected override String GetCommandDisplayName(String actionParameter, PluginImageSize imageSize)
         {
             var preset = this.HapticPlugin?.CurrentPreset ?? SensitivityPreset.Medium;
             return preset.ToString();
         }
 
-        protected override BitmapImage GetCommandImage(string actionParameter, PluginImageSize imageSize)
+        protected override BitmapImage GetCommandImage(String actionParameter, PluginImageSize imageSize)
         {
             var preset = this.HapticPlugin?.CurrentPreset ?? SensitivityPreset.Medium;
             using var builder = new BitmapBuilder(imageSize);

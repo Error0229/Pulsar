@@ -1,7 +1,8 @@
-using System.Collections.Generic;
-using Pulsar.Native;
-
 namespace Pulsar.Haptics;
+
+using System.Collections.Generic;
+
+using Pulsar.Native;
 
 /// <summary>
 /// Maps cursor transitions to haptic waveforms
@@ -10,10 +11,7 @@ public class WaveformMapper
 {
     private readonly Dictionary<(CursorType, CursorType), WaveformType> _mappings;
 
-    public WaveformMapper()
-    {
-        _mappings = new Dictionary<(CursorType, CursorType), WaveformType>();
-    }
+    public WaveformMapper() => this._mappings = new Dictionary<(CursorType, CursorType), WaveformType>();
 
     /// <summary>
     /// Create mapper with default semantic mappings
@@ -63,17 +61,14 @@ public class WaveformMapper
     /// <summary>
     /// Set custom waveform for a transition
     /// </summary>
-    public void SetMapping(CursorType from, CursorType to, WaveformType waveform)
-    {
-        _mappings[(from, to)] = waveform;
-    }
+    public void SetMapping(CursorType from, CursorType to, WaveformType waveform) => this._mappings[(from, to)] = waveform;
 
     /// <summary>
     /// Get waveform for a cursor transition
     /// </summary>
     public WaveformType GetWaveform(CursorType from, CursorType to)
     {
-        if (_mappings.TryGetValue((from, to), out var waveform))
+        if (this._mappings.TryGetValue((from, to), out var waveform))
         {
             return waveform;
         }
@@ -85,7 +80,7 @@ public class WaveformMapper
     /// <summary>
     /// Convert WaveformType to SDK event name
     /// </summary>
-    public static string ToEventName(WaveformType waveform)
+    public static String ToEventName(WaveformType waveform)
     {
         return waveform switch
         {

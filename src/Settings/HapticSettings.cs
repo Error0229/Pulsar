@@ -1,19 +1,24 @@
+namespace Pulsar.Settings;
+
 using Pulsar.Filtering;
 using Pulsar.Haptics;
 using Pulsar.Native;
-
-namespace Pulsar.Settings;
 
 /// <summary>
 /// Configuration for haptic cursor feedback
 /// </summary>
 public class HapticSettings
 {
-    public bool Enabled { get; set; } = true;
+    public Boolean Enabled { get; set; } = true;
     public SensitivityPreset Preset { get; set; } = SensitivityPreset.Medium;
     public MonitoringMode MonitoringMode { get; set; } = MonitoringMode.Polling;
-    public int ThrottleMs { get; set; } = 250;
-    public int ActivityDetectionWindowMs { get; set; } = 5000;
+    public Int32 ThrottleMs { get; set; } = 250;
+    public Int32 ActivityDetectionWindowMs { get; set; } = 5000;
+
+    /// <summary>
+    /// Enable verbose logging for cursor changes (default: false to reduce log noise)
+    /// </summary>
+    public Boolean VerboseCursorLogging { get; set; } = false;
 
     public CursorTypeFilter CursorFilter { get; set; } = new();
     public WaveformMapper WaveformMapper { get; set; } = WaveformMapper.CreateDefault();

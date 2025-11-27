@@ -1,6 +1,6 @@
-using Pulsar.Native;
-
 namespace Pulsar.Monitoring;
+
+using Pulsar.Native;
 
 /// <summary>
 /// Interface for cursor monitoring implementations

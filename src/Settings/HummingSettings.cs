@@ -8,7 +8,7 @@ public class HummingSettings
     /// <summary>
     /// Whether Humming mode is enabled.
     /// </summary>
-    public bool Enabled { get; set; } = false;
+    public Boolean Enabled { get; set; } = false;
 
     /// <summary>
     /// Current analysis strategy.
@@ -18,15 +18,15 @@ public class HummingSettings
     /// <summary>
     /// Sensitivity multiplier (0.5 = less sensitive, 2.0 = more sensitive).
     /// </summary>
-    public float Sensitivity { get; set; } = 1.0f;
+    public Single Sensitivity { get; set; } = 1.0f;
 
     /// <summary>
     /// Minimum threshold to trigger haptics (0.0 - 1.0).
     /// </summary>
-    public float Threshold { get; set; } = 0.1f;
+    public Single Threshold { get; set; } = 0.1f;
 
     /// <summary>
     /// FFT buffer size (1024 recommended for ~23ms at 44.1kHz).
     /// </summary>
-    public int FftSize { get; set; } = 1024;
+    public Int32 FftSize { get; set; } = 1024;
 }

@@ -1,9 +1,9 @@
+namespace Pulsar.Monitoring;
+
 using System;
 using System.Threading;
 
 using Pulsar.Native;
-
-namespace Pulsar.Monitoring;
 
 /// <summary>
 /// Polls Windows cursor state at regular intervals to detect changes
@@ -11,76 +11,87 @@ namespace Pulsar.Monitoring;
 /// </summary>
 public class PollingCursorMonitor : ICursorMonitor
 {
-    private readonly int _pollIntervalMs;
+    private readonly Int32 _pollIntervalMs;
     private readonly Timer _timer;
-    private readonly object _lock = new object();
+    private readonly Object _lock = new Object();
     private CursorType _lastCursorType;
     private IntPtr _lastCursorHandle;
-    private bool _isRunning;
+    private Boolean _isRunning;
 
     public event Action<CursorType, CursorType> CursorChanged;
 
-    public PollingCursorMonitor(int pollIntervalMs = 50)
+    public PollingCursorMonitor(Int32 pollIntervalMs = 50)
     {
-        _pollIntervalMs = pollIntervalMs;
-        _timer = new Timer(OnTimerTick, null, Timeout.Infinite, Timeout.Infinite);
+        this._pollIntervalMs = pollIntervalMs;
+        this._timer = new Timer(this.OnTimerTick, null, Timeout.Infinite, Timeout.Infinite);
 
         // Initialize with current cursor
         var cursorInfo = User32.GetCurrentCursor();
-        _lastCursorHandle = cursorInfo.hCursor;
-        _lastCursorType = User32.GetCursorType(_lastCursorHandle);
+        this._lastCursorHandle = cursorInfo.hCursor;
+        this._lastCursorType = User32.GetCursorType(this._lastCursorHandle);
     }
 
     public void Start()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            if (_isRunning) return;
+            if (this._isRunning)
+            {
+                return;
+            }
 
-            _isRunning = true;
-            _timer.Change(0, _pollIntervalMs);
+            this._isRunning = true;
+            this._timer.Change(0, this._pollIntervalMs);
         }
     }
 
     public void Stop()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            if (!_isRunning) return;
+            if (!this._isRunning)
+            {
+                return;
+            }
 
-            _isRunning = false;
-            _timer.Change(Timeout.Infinite, Timeout.Infinite);
+            this._isRunning = false;
+            this._timer.Change(Timeout.Infinite, Timeout.Infinite);
         }
     }
 
-    private void OnTimerTick(object state)
+    private void OnTimerTick(Object state)
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            if (!_isRunning) return;
+            if (!this._isRunning)
+            {
+                return;
+            }
 
             try
             {
                 var cursorInfo = User32.GetCurrentCursor();
 
                 // Only process if cursor handle changed
-                if (cursorInfo.hCursor == _lastCursorHandle)
+                if (cursorInfo.hCursor == this._lastCursorHandle)
+                {
                     return;
+                }
 
                 var newCursorType = User32.GetCursorType(cursorInfo.hCursor);
 
                 // Only raise event if cursor TYPE changed (not just handle)
-                if (newCursorType != _lastCursorType)
+                if (newCursorType != this._lastCursorType)
                 {
-                    var oldType = _lastCursorType;
-                    _lastCursorType = newCursorType;
-                    _lastCursorHandle = cursorInfo.hCursor;
+                    var oldType = this._lastCursorType;
+                    this._lastCursorType = newCursorType;
+                    this._lastCursorHandle = cursorInfo.hCursor;
 
                     CursorChanged?.Invoke(oldType, newCursorType);
                 }
                 else
                 {
-                    _lastCursorHandle = cursorInfo.hCursor;
+                    this._lastCursorHandle = cursorInfo.hCursor;
                 }
             }
             catch
@@ -92,11 +103,11 @@ public class PollingCursorMonitor : ICursorMonitor
 
     public void Dispose()
     {
-        lock (_lock)
+        lock (this._lock)
         {
-            Stop();
+            this.Stop();
             CursorChanged = null; // Clear subscribers
-            _timer?.Dispose();
+            this._timer?.Dispose();
         }
     }
 }

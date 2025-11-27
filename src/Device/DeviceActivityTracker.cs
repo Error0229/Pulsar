@@ -1,7 +1,7 @@
+namespace Pulsar.Device;
+
 using System;
 using System.Diagnostics;
-
-namespace Pulsar.Device;
 
 /// <summary>
 /// Tracks MX Master 4 activity to determine if haptics should trigger
@@ -9,45 +9,39 @@ namespace Pulsar.Device;
 /// </summary>
 public class DeviceActivityTracker
 {
-    private readonly int _activityWindowMs;
+    private readonly Int32 _activityWindowMs;
     private readonly Stopwatch _stopwatch;
-    private long? _lastActivityTimestamp;
+    private Int64? _lastActivityTimestamp;
 
-    public DeviceActivityTracker(int activityWindowMs = 5000)
+    public DeviceActivityTracker(Int32 activityWindowMs = 5000)
     {
-        _activityWindowMs = activityWindowMs;
-        _stopwatch = Stopwatch.StartNew();
+        this._activityWindowMs = activityWindowMs;
+        this._stopwatch = Stopwatch.StartNew();
         // Start active - assume mouse is being used until inactivity proves otherwise
-        _lastActivityTimestamp = 0;
+        this._lastActivityTimestamp = 0;
     }
 
     /// <summary>
     /// Record that MX Master 4 was used (button click, wheel scroll, etc.)
     /// </summary>
-    public void RecordActivity()
-    {
-        _lastActivityTimestamp = _stopwatch.ElapsedMilliseconds;
-    }
+    public void RecordActivity() => this._lastActivityTimestamp = this._stopwatch.ElapsedMilliseconds;
 
     /// <summary>
     /// Check if MX Master 4 has been used recently
     /// </summary>
-    public bool IsActive()
+    public Boolean IsActive()
     {
-        if (!_lastActivityTimestamp.HasValue)
+        if (!this._lastActivityTimestamp.HasValue)
         {
             return false;
         }
 
-        var currentMs = _stopwatch.ElapsedMilliseconds;
-        return (currentMs - _lastActivityTimestamp.Value) <= _activityWindowMs;
+        var currentMs = this._stopwatch.ElapsedMilliseconds;
+        return (currentMs - this._lastActivityTimestamp.Value) <= this._activityWindowMs;
     }
 
     /// <summary>
     /// Reset activity tracking
     /// </summary>
-    public void Reset()
-    {
-        _lastActivityTimestamp = null;
-    }
+    public void Reset() => this._lastActivityTimestamp = null;
 }

@@ -1,20 +1,22 @@
-using System.Numerics;
-
 namespace Pulsar.Audio;
+
+using System.Numerics;
 
 /// <summary>
 /// Performs FFT analysis on audio samples.
 /// </summary>
 public class FFTAnalyzer
 {
-    private readonly int _fftSize;
+    private readonly Int32 _fftSize;
 
-    public FFTAnalyzer(int fftSize = 1024)
+    public FFTAnalyzer(Int32 fftSize = 1024)
     {
         if (fftSize <= 0 || (fftSize & (fftSize - 1)) != 0)
+        {
             throw new ArgumentException($"FFT size must be power of 2, got {fftSize}");
+        }
 
-        _fftSize = fftSize;
+        this._fftSize = fftSize;
     }
 
     /// <summary>
@@ -22,19 +24,19 @@ public class FFTAnalyzer
     /// </summary>
     /// <param name="samples">Audio samples (must match FFT size)</param>
     /// <returns>Magnitude spectrum (half of FFT size)</returns>
-    public float[] ComputeSpectrum(float[] samples)
+    public Single[] ComputeSpectrum(Single[] samples)
     {
-        if (samples.Length != _fftSize)
+        if (samples.Length != this._fftSize)
         {
-            throw new ArgumentException($"Expected {_fftSize} samples, got {samples.Length}");
+            throw new ArgumentException($"Expected {this._fftSize} samples, got {samples.Length}");
         }
 
         // Apply Hanning window
         var windowed = ApplyHanningWindow(samples);
 
         // Convert to complex
-        var complex = new Complex[_fftSize];
-        for (var i = 0; i < _fftSize; i++)
+        var complex = new Complex[this._fftSize];
+        for (var i = 0; i < this._fftSize; i++)
         {
             complex[i] = new Complex(windowed[i], 0);
         }
@@ -43,10 +45,10 @@ public class FFTAnalyzer
         FFT(complex);
 
         // Compute magnitudes (only need first half due to symmetry)
-        var magnitudes = new float[_fftSize / 2];
+        var magnitudes = new Single[this._fftSize / 2];
         for (var i = 0; i < magnitudes.Length; i++)
         {
-            magnitudes[i] = (float)complex[i].Magnitude;
+            magnitudes[i] = (Single)complex[i].Magnitude;
         }
 
         return magnitudes;
@@ -55,23 +57,23 @@ public class FFTAnalyzer
     /// <summary>
     /// Get the frequency for a given bin index.
     /// </summary>
-    public float GetFrequency(int binIndex, int sampleRate)
-    {
-        return binIndex * sampleRate / (float)_fftSize;
-    }
+    public Single GetFrequency(Int32 binIndex, Int32 sampleRate) => binIndex * sampleRate / (Single)this._fftSize;
 
     /// <summary>
     /// Get frequency band energy.
     /// </summary>
-    public float GetBandEnergy(float[] spectrum, int sampleRate, float minFreq, float maxFreq)
+    public Single GetBandEnergy(Single[] spectrum, Int32 sampleRate, Single minFreq, Single maxFreq)
     {
-        var minBin = (int)(minFreq * _fftSize / sampleRate);
-        var maxBin = (int)(maxFreq * _fftSize / sampleRate);
+        var minBin = (Int32)(minFreq * this._fftSize / sampleRate);
+        var maxBin = (Int32)(maxFreq * this._fftSize / sampleRate);
 
         minBin = Math.Max(0, Math.Min(minBin, spectrum.Length - 1));
         maxBin = Math.Max(0, Math.Min(maxBin, spectrum.Length - 1));
 
-        if (minBin >= maxBin) return 0;
+        if (minBin >= maxBin)
+        {
+            return 0;
+        }
 
         var count = maxBin - minBin + 1;
         var sum = 0f;
@@ -80,15 +82,17 @@ public class FFTAnalyzer
             sum += spectrum[i] * spectrum[i];
         }
 
-        return (float)Math.Sqrt(sum / count);
+        return (Single)Math.Sqrt(sum / count);
     }
 
-    private static float[] ApplyHanningWindow(float[] samples)
+    private static Single[] ApplyHanningWindow(Single[] samples)
     {
         if (samples.Length == 0)
+        {
             throw new ArgumentException("Cannot apply window to empty buffer");
+        }
 
-        var windowed = new float[samples.Length];
+        var windowed = new Single[samples.Length];
 
         if (samples.Length == 1)
         {
@@ -107,10 +111,13 @@ public class FFTAnalyzer
     private static void FFT(Complex[] data)
     {
         var n = data.Length;
-        if (n <= 1) return;
+        if (n <= 1)
+        {
+            return;
+        }
 
         // Bit-reversal permutation
-        for (int i = 1, j = 0; i < n; i++)
+        for (Int32 i = 1, j = 0; i < n; i++)
         {
             var bit = n >> 1;
             for (; (j & bit) != 0; bit >>= 1)

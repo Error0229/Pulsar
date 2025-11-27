@@ -1,8 +1,9 @@
+namespace Pulsar.Filtering;
+
 using System;
 using System.Collections.Generic;
-using Pulsar.Native;
 
-namespace Pulsar.Filtering;
+using Pulsar.Native;
 
 /// <summary>
 /// Filters cursor transitions based on user preferences
@@ -11,26 +12,17 @@ public class CursorTypeFilter
 {
     private readonly HashSet<(CursorType, CursorType)> _enabledTransitions;
 
-    public CursorTypeFilter()
-    {
-        _enabledTransitions = new HashSet<(CursorType, CursorType)>();
-    }
+    public CursorTypeFilter() => this._enabledTransitions = new HashSet<(CursorType, CursorType)>();
 
     /// <summary>
     /// Enable haptics for a specific cursor transition
     /// </summary>
-    public void EnableTransition(CursorType from, CursorType to)
-    {
-        _enabledTransitions.Add((from, to));
-    }
+    public void EnableTransition(CursorType from, CursorType to) => this._enabledTransitions.Add((from, to));
 
     /// <summary>
     /// Disable haptics for a specific cursor transition
     /// </summary>
-    public void DisableTransition(CursorType from, CursorType to)
-    {
-        _enabledTransitions.Remove((from, to));
-    }
+    public void DisableTransition(CursorType from, CursorType to) => this._enabledTransitions.Remove((from, to));
 
     /// <summary>
     /// Enable all cursor transitions
@@ -44,7 +36,7 @@ public class CursorTypeFilter
             {
                 if (from != to)
                 {
-                    _enabledTransitions.Add((from, to));
+                    this._enabledTransitions.Add((from, to));
                 }
             }
         }
@@ -53,16 +45,10 @@ public class CursorTypeFilter
     /// <summary>
     /// Disable all cursor transitions
     /// </summary>
-    public void DisableAll()
-    {
-        _enabledTransitions.Clear();
-    }
+    public void DisableAll() => this._enabledTransitions.Clear();
 
     /// <summary>
     /// Check if transition should trigger haptic
     /// </summary>
-    public bool ShouldAllow(CursorType from, CursorType to)
-    {
-        return _enabledTransitions.Contains((from, to));
-    }
+    public Boolean ShouldAllow(CursorType from, CursorType to) => this._enabledTransitions.Contains((from, to));
 }
